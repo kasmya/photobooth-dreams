@@ -1,26 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import Photobooth from "@/components/Photobooth";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  component: Photobooth,
+  head: () => ({
+    meta: [
+      { title: "snapcore.booth — Y2K Photobooth Strips" },
+      { name: "description", content: "A trendy Pinterest-style photobooth: pick a lens, choose a strip, snap, and download a 3D-animated photostrip." },
+    ],
+  }),
 });
-
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
-}
