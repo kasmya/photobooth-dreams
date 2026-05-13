@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { LENSES, type Lens } from "@/lib/lenses";
 import { FRAMES, type FrameTemplate } from "@/lib/frames";
 import { captureFromVideo, composeFrame } from "@/lib/photo";
+import boothImg from "@/assets/booth.png";
 
 type Step = "start" | "lens" | "frame" | "capture" | "reveal";
 
@@ -16,7 +17,7 @@ export default function Photobooth() {
   const [step, setStep] = useState<Step>("start");
   const [lens, setLens] = useState<Lens>(LENSES[0]);
   const [frame, setFrame] = useState<FrameTemplate>(FRAMES[0]);
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [, setPhotos] = useState<string[]>([]);
   const [composed, setComposed] = useState<string | null>(null);
 
   const reset = () => {
@@ -27,7 +28,6 @@ export default function Photobooth() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
-      {/* Decorative background stickers */}
       <Sticker className="top-10 left-6 text-5xl" r={-15}>✨</Sticker>
       <Sticker className="top-32 right-10 text-6xl" r={20}>💖</Sticker>
       <Sticker className="bottom-24 left-12 text-5xl" r={10}>⭐</Sticker>
@@ -45,21 +45,10 @@ export default function Photobooth() {
         <AnimatePresence mode="wait">
           {step === "start" && <StartScreen key="start" onStart={() => setStep("lens")} />}
           {step === "lens" && (
-            <LensScreen
-              key="lens"
-              selected={lens}
-              onSelect={(l) => { setLens(l); }}
-              onNext={() => setStep("frame")}
-            />
+            <LensScreen key="lens" selected={lens} onSelect={(l) => setLens(l)} onNext={() => setStep("frame")} />
           )}
           {step === "frame" && (
-            <FrameScreen
-              key="frame"
-              selected={frame}
-              onSelect={setFrame}
-              onBack={() => setStep("lens")}
-              onNext={() => setStep("capture")}
-            />
+            <FrameScreen key="frame" selected={frame} onSelect={setFrame} onBack={() => setStep("lens")} onNext={() => setStep("capture")} />
           )}
           {step === "capture" && (
             <CaptureScreen
@@ -76,12 +65,7 @@ export default function Photobooth() {
             />
           )}
           {step === "reveal" && composed && (
-            <RevealScreen
-              key="reveal"
-              image={composed}
-              frame={frame}
-              onRetake={reset}
-            />
+            <RevealScreen key="reveal" image={composed} frame={frame} onRetake={reset} />
           )}
         </AnimatePresence>
       </main>
@@ -97,14 +81,11 @@ function StartScreen({ onStart }: { onStart: () => void }) {
       className="text-center pt-10 sm:pt-16"
     >
       <div className="inline-block scribble text-3xl text-primary mb-2 -rotate-3">a lil photobooth ♡</div>
-      <h1 className="text-6xl sm:text-8xl font-black leading-none">
-        snap your<br />
-        <span className="inline-block bg-primary text-primary-foreground px-4 -rotate-2 mt-2 rounded-2xl">
-          coreteen era
-        </span>
+      <h1 className="text-5xl sm:text-7xl font-black leading-tight max-w-3xl mx-auto">
+        Smile in style,<br />stay awhile.
       </h1>
       <p className="mt-6 text-lg text-muted-foreground max-w-md mx-auto">
-        Pick a lens, choose a frame, take 3 or 4 shots, and watch your strip pop straight out of the booth.
+        Pick a lens, choose a frame, take your shots, and watch your strip pop straight out of the booth.
       </p>
 
       <motion.button
@@ -116,19 +97,15 @@ function StartScreen({ onStart }: { onStart: () => void }) {
         Step inside the booth →
       </motion.button>
 
-      {/* 3D booth preview */}
-      <div className="mt-16 mx-auto" style={{ perspective: 1200 }}>
+      {/* 3D booth preview using attached illustration */}
+      <div className="mt-14 mx-auto" style={{ perspective: 1400 }}>
         <motion.div
-          animate={{ rotateY: [-12, 12, -12] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ rotateY: [-10, 10, -10], y: [0, -8, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
           style={{ transformStyle: "preserve-3d" }}
-          className="relative w-64 h-80 mx-auto"
+          className="relative w-72 sm:w-96 mx-auto"
         >
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-primary to-bubblegum pop-shadow" />
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 w-40 h-24 rounded-xl bg-cream border-4 border-foreground" />
-          <div className="absolute top-32 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-foreground" />
-          <div className="absolute top-32 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-destructive animate-ping opacity-40" />
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-44 h-3 rounded-full bg-foreground/20" />
+          <img src={boothImg} alt="photo booth" className="w-full h-auto drop-shadow-2xl" />
         </motion.div>
       </div>
     </motion.section>
@@ -138,10 +115,7 @@ function StartScreen({ onStart }: { onStart: () => void }) {
 /* ------------------- LENS ------------------- */
 function LensScreen({ selected, onSelect, onNext }: { selected: Lens; onSelect: (l: Lens) => void; onNext: () => void }) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-      className="pt-6"
-    >
+    <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="pt-6">
       <StepHeader n={1} title="pick your lens" sub="each lens color-grades your shots" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {LENSES.map((l) => {
@@ -153,18 +127,9 @@ function LensScreen({ selected, onSelect, onNext }: { selected: Lens; onSelect: 
               whileHover={{ y: -4 }}
               className={`relative text-left rounded-3xl p-5 border-2 transition-colors ${active ? "border-foreground pop-shadow bg-card" : "border-border bg-card/70"}`}
             >
-              <div
-                className="aspect-[5/3] rounded-2xl mb-4 relative overflow-hidden border-2 border-foreground/10"
-                style={{ background: l.swatch }}
-              >
-                <div className={`absolute inset-0 ${l.cssClass}`}>
-                  <SamplePhoto />
-                </div>
-                {active && (
-                  <span className="absolute top-2 right-2 bg-foreground text-background text-xs font-bold px-2 py-1 rounded-full">
-                    chosen
-                  </span>
-                )}
+              <div className="aspect-[5/3] rounded-2xl mb-4 relative overflow-hidden border-2 border-foreground/10" style={{ background: l.swatch }}>
+                <div className={`absolute inset-0 ${l.cssClass}`}><SamplePhoto /></div>
+                {active && (<span className="absolute top-2 right-2 bg-foreground text-background text-xs font-bold px-2 py-1 rounded-full">chosen</span>)}
               </div>
               <div className="flex items-baseline justify-between">
                 <h3 className="text-xl font-bold">{l.name}</h3>
@@ -191,10 +156,7 @@ function SamplePhoto() {
 /* ------------------- FRAME ------------------- */
 function FrameScreen({ selected, onSelect, onBack, onNext }: { selected: FrameTemplate; onSelect: (f: FrameTemplate) => void; onBack: () => void; onNext: () => void }) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-      className="pt-6"
-    >
+    <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="pt-6">
       <StepHeader n={2} title="pick your strip" sub={`${selected.slots.length} shots — ${selected.vibe}`} />
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {FRAMES.map((f) => {
@@ -206,7 +168,9 @@ function FrameScreen({ selected, onSelect, onBack, onNext }: { selected: FrameTe
               whileHover={{ y: -4, rotate: -1 }}
               className={`relative rounded-2xl p-2 border-2 ${active ? "border-foreground pop-shadow bg-card" : "border-border bg-card/70"}`}
             >
-              <img src={f.src} alt={f.name} className="w-full h-auto rounded-xl" />
+              <div className="rounded-xl overflow-hidden bg-gradient-to-br from-[#ffd1e0] via-[#fff5d8] to-[#c4f0ff]">
+                <img src={f.src} alt={f.name} className="w-full h-auto block" />
+              </div>
               <div className="text-center mt-2 text-sm font-bold">{f.name}</div>
               <div className="text-center text-xs text-muted-foreground">{f.slots.length} shots</div>
               {active && <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-full rotate-6">picked!</span>}
@@ -223,7 +187,7 @@ function FrameScreen({ selected, onSelect, onBack, onNext }: { selected: FrameTe
 function CaptureScreen({ lens, frame, onBack, onComplete }: { lens: Lens; frame: FrameTemplate; onBack: () => void; onComplete: (photos: string[]) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [shots, setShots] = useState<string[]>([]);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -234,65 +198,63 @@ function CaptureScreen({ lens, frame, onBack, onComplete }: { lens: Lens; frame:
     navigator.mediaDevices?.getUserMedia({ video: { facingMode: "user", width: 1280, height: 720 }, audio: false })
       .then((s) => {
         if (!active) { s.getTracks().forEach(t => t.stop()); return; }
-        setStream(s);
+        streamRef.current = s;
         if (videoRef.current) videoRef.current.srcObject = s;
       })
       .catch((e) => setError(e.message || "Camera unavailable"));
     return () => {
       active = false;
-      stream?.getTracks().forEach(t => t.stop());
+      streamRef.current?.getTracks().forEach(t => t.stop());
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const need = frame.slots.length;
 
-  const takeOne = async () => {
-    if (!videoRef.current || busy) return;
-    setBusy(true);
+  const captureOnce = async (): Promise<string | null> => {
+    const v = videoRef.current;
+    if (!v || !v.videoWidth) return null;
     for (let n = 3; n >= 1; n--) {
       setCountdown(n);
       await new Promise(r => setTimeout(r, 700));
     }
-    setCountdown(0); // FLASH
-    await new Promise(r => setTimeout(r, 120));
-    const data = captureFromVideo(videoRef.current, lens);
+    setCountdown(0);
+    await new Promise(r => setTimeout(r, 150));
+    const v2 = videoRef.current;
+    const data = v2 && v2.videoWidth ? captureFromVideo(v2, lens) : null;
     setCountdown(null);
-    const next = [...shots, data];
-    setShots(next);
-    setBusy(false);
-    if (next.length >= need) {
-      stream?.getTracks().forEach(t => t.stop());
-      setTimeout(() => onComplete(next), 400);
+    return data;
+  };
+
+  const takeOne = async () => {
+    if (busy || shots.length >= need) return;
+    setBusy(true);
+    const data = await captureOnce();
+    if (data) {
+      const next = [...shots, data];
+      setShots(next);
+      if (next.length >= need) {
+        streamRef.current?.getTracks().forEach(t => t.stop());
+        setTimeout(() => onComplete(next), 500);
+      }
     }
+    setBusy(false);
   };
 
   const takeAll = async () => {
-    setShots([]);
+    if (busy) return;
+    setBusy(true);
+    const collected: string[] = [];
     for (let i = 0; i < need; i++) {
-      // eslint-disable-next-line no-await-in-loop
-      await new Promise<void>(async (res) => {
-        if (!videoRef.current) return res();
-        for (let n = 3; n >= 1; n--) {
-          setCountdown(n);
-          // eslint-disable-next-line no-await-in-loop
-          await new Promise(r => setTimeout(r, 650));
-        }
-        setCountdown(0);
-        await new Promise(r => setTimeout(r, 120));
-        const data = captureFromVideo(videoRef.current, lens);
-        setShots(prev => {
-          const next = [...prev, data];
-          if (next.length >= need) {
-            stream?.getTracks().forEach(t => t.stop());
-            setTimeout(() => onComplete(next), 500);
-          }
-          return next;
-        });
-        setCountdown(null);
-        await new Promise(r => setTimeout(r, 600));
-        res();
-      });
+      const data = await captureOnce();
+      if (!data) break;
+      collected.push(data);
+      setShots([...collected]);
+      if (collected.length < need) await new Promise(r => setTimeout(r, 600));
+    }
+    setBusy(false);
+    if (collected.length >= need) {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+      setTimeout(() => onComplete(collected), 500);
     }
   };
 
@@ -302,7 +264,6 @@ function CaptureScreen({ lens, frame, onBack, onComplete }: { lens: Lens; frame:
     const reads = await Promise.all(files.slice(0, need - shots.length).map(file => new Promise<string>((res) => {
       const reader = new FileReader();
       reader.onload = () => {
-        // apply lens to uploaded image via offscreen canvas
         const img = new Image();
         img.onload = () => {
           const c = document.createElement("canvas");
@@ -331,19 +292,16 @@ function CaptureScreen({ lens, frame, onBack, onComplete }: { lens: Lens; frame:
     const next = [...shots, ...reads];
     setShots(next);
     if (next.length >= need) {
-      stream?.getTracks().forEach(t => t.stop());
+      streamRef.current?.getTracks().forEach(t => t.stop());
       setTimeout(() => onComplete(next.slice(0, need)), 400);
     }
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-      className="pt-6"
-    >
+    <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="pt-6">
       <StepHeader n={3} title="strike a pose" sub={`${shots.length} / ${need} shots · lens: ${lens.name}`} />
 
-      <div className="grid lg:grid-cols-[1fr,280px] gap-6 items-start">
+      <div className="max-w-3xl mx-auto">
         <div className="relative rounded-3xl overflow-hidden border-4 border-foreground bg-black aspect-video pop-shadow">
           {error ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-cream gap-3 p-6 text-center">
@@ -374,12 +332,12 @@ function CaptureScreen({ lens, frame, onBack, onComplete }: { lens: Lens; frame:
                     initial={{ scale: 2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.5, opacity: 0 }}
-                    className="absolute inset-0 flex items-center justify-center"
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
                   >
                     {countdown === 0 ? (
-                      <motion.div initial={{ opacity: 0.9 }} animate={{ opacity: 0 }} transition={{ duration: 0.3 }} className="absolute inset-0 bg-white" />
+                      <motion.div initial={{ opacity: 0.95 }} animate={{ opacity: 0 }} transition={{ duration: 0.35 }} className="absolute inset-0 bg-white" />
                     ) : (
-                      <span className="text-[14rem] font-black text-white drop-shadow-[0_0_30px_rgba(0,0,0,0.5)]">{countdown}</span>
+                      <span className="text-[10rem] sm:text-[14rem] font-black text-white drop-shadow-[0_0_30px_rgba(0,0,0,0.6)]">{countdown}</span>
                     )}
                   </motion.div>
                 )}
@@ -388,44 +346,48 @@ function CaptureScreen({ lens, frame, onBack, onComplete }: { lens: Lens; frame:
           )}
         </div>
 
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            {Array.from({ length: need }).map((_, i) => (
-              <div key={i} className="aspect-[4/3] rounded-xl border-2 border-dashed border-border bg-card/50 overflow-hidden flex items-center justify-center">
-                {shots[i] ? (
-                  <motion.img initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} src={shots[i]} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-2xl text-muted-foreground">{i + 1}</span>
-                )}
-              </div>
-            ))}
-          </div>
-
+        {/* Take buttons directly under camera */}
+        <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={takeOne}
             disabled={busy || !!error || shots.length >= need}
-            className="w-full bg-primary text-primary-foreground text-xl font-bold py-4 rounded-2xl pop-shadow disabled:opacity-50"
+            className="flex-1 bg-primary text-primary-foreground text-xl font-bold py-4 rounded-2xl pop-shadow disabled:opacity-50"
           >
             📸 Take shot
           </button>
           <button
             onClick={takeAll}
             disabled={busy || !!error || shots.length >= need}
-            className="w-full bg-card border-2 border-foreground text-foreground font-bold py-3 rounded-2xl disabled:opacity-50"
+            className="flex-1 bg-card border-2 border-foreground text-foreground font-bold py-4 rounded-2xl disabled:opacity-50"
           >
             ⏯ Auto-burst all {need}
           </button>
+        </div>
+
+        {/* Thumbnails */}
+        <div className={`mt-4 grid gap-2 ${need <= 3 ? "grid-cols-3" : "grid-cols-4"}`}>
+          {Array.from({ length: need }).map((_, i) => (
+            <div key={i} className="aspect-[4/3] rounded-xl border-2 border-dashed border-border bg-card/50 overflow-hidden flex items-center justify-center">
+              {shots[i] ? (
+                <motion.img initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} src={shots[i]} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl text-muted-foreground">{i + 1}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={shots.length >= need}
-            className="w-full bg-card border-2 border-border text-foreground font-bold py-3 rounded-2xl disabled:opacity-50"
+            className="bg-card border-2 border-border text-foreground font-bold py-2 px-4 rounded-xl text-sm disabled:opacity-50"
           >
             📁 Upload from device
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" multiple capture="user" onChange={onUpload} className="hidden" />
-
           {shots.length > 0 && (
-            <button onClick={() => setShots([])} className="w-full text-sm text-muted-foreground underline">clear shots</button>
+            <button onClick={() => setShots([])} className="text-sm text-muted-foreground underline">clear shots</button>
           )}
         </div>
       </div>
@@ -445,44 +407,33 @@ function RevealScreen({ image, frame, onRetake }: { image: string; frame: FrameT
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="pt-6"
-    >
+    <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="pt-6">
       <StepHeader n={4} title="fresh out the booth" sub="your strip is ready ♡" />
 
-      <div className="grid lg:grid-cols-[1fr,1fr] gap-10 items-center">
+      <div className="grid lg:grid-cols-2 gap-10 items-center">
         {/* 3D booth ejecting strip */}
-        <div className="relative mx-auto" style={{ perspective: 1400 }}>
-          <div className="relative w-[320px] h-[420px] mx-auto">
-            {/* booth body */}
-            <div className="absolute inset-0 rounded-[28px] bg-gradient-to-b from-primary to-bubblegum pop-shadow" />
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-52 h-32 rounded-2xl bg-cream border-4 border-foreground flex items-center justify-center">
-              <span className="scribble text-3xl">snap!</span>
-            </div>
-            <div className="absolute bottom-20 left-6 right-6 h-3 rounded-full bg-foreground/40" />
-            {/* slot opening */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-44 h-4 bg-foreground rounded-full" />
+        <div className="relative mx-auto" style={{ perspective: 1600 }}>
+          <div className="relative w-[320px] h-[460px] mx-auto">
+            <img src={boothImg} alt="booth" className="absolute inset-0 w-full h-full object-contain drop-shadow-2xl" />
 
-            {/* ejected strip */}
+            {/* falling strip out of slot */}
             <motion.div
-              initial={{ y: -180, opacity: 0, rotateX: 70 }}
-              animate={{ y: 200, opacity: 1, rotateX: 0 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 60, damping: 14 }}
+              initial={{ y: -30, opacity: 0, rotateX: 70, rotateZ: -4 }}
+              animate={{ y: [ -30, 80, 240, 380 ], opacity: [0, 1, 1, 1], rotateX: [70, 30, 5, 0], rotateZ: [-4, 2, -3, 1] }}
+              transition={{ duration: 2.4, times: [0, 0.25, 0.65, 1], ease: "easeOut" }}
               style={{ transformOrigin: "top center", transformStyle: "preserve-3d" }}
-              className="absolute left-1/2 -translate-x-1/2 top-0 w-32 soft-shadow rounded-md overflow-hidden border-2 border-foreground"
+              className="absolute left-1/2 -translate-x-1/2 top-[55%] w-32 soft-shadow rounded-md overflow-hidden border-2 border-foreground bg-card"
             >
               <img src={image} alt="strip" className="block w-full h-auto" />
             </motion.div>
 
-            {/* sparkle bursts */}
             {[0, 1, 2, 3, 4].map((i) => (
               <motion.span
                 key={i}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: [0, 1, 0], scale: [0, 1.4, 0], y: [0, -60 - i * 10], x: (i - 2) * 40 }}
-                transition={{ delay: 1 + i * 0.15, duration: 1.2, repeat: Infinity, repeatDelay: 1.5 }}
-                className="absolute bottom-16 left-1/2 text-3xl"
+                transition={{ delay: 1.2 + i * 0.15, duration: 1.2, repeat: Infinity, repeatDelay: 1.5 }}
+                className="absolute top-[55%] left-1/2 text-3xl pointer-events-none"
               >
                 {i % 2 ? "✨" : "💖"}
               </motion.span>
@@ -494,7 +445,7 @@ function RevealScreen({ image, frame, onRetake }: { image: string; frame: FrameT
           <motion.img
             initial={{ rotate: -6, y: 30, opacity: 0 }}
             animate={{ rotate: -2, y: 0, opacity: 1 }}
-            transition={{ delay: 1.4, type: "spring" }}
+            transition={{ delay: 1.6, type: "spring" }}
             src={image}
             alt="your photostrip"
             className="max-h-[640px] mx-auto soft-shadow rounded-xl"
